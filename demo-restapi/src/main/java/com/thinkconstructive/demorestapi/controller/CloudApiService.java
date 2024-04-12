@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/cloudVendor")
 public class CloudApiService
 {
-    private com.thinkconstructive.demorestapi.Models.cloudVendor cloudVendor;
+    cloudVendor cloudVendor;
 
     @GetMapping("{vendorId}")
     public cloudVendor getVendorDetails(String vendorId) {
