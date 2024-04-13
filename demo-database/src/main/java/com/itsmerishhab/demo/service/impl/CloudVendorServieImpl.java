@@ -1,5 +1,6 @@
 package com.itsmerishhab.demo.service.impl;
 
+import com.itsmerishhab.demo.exception.CloudVendorNotFoundException;
 import com.itsmerishhab.demo.model.CloudVendor;
 import com.itsmerishhab.demo.repository.CloudVendorRepository;
 import com.itsmerishhab.demo.service.CloudVendorService;
@@ -8,7 +9,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class CloudVendorServieImpl implements CloudVendorService {
+public class CloudVendorServieImpl implements CloudVendorService  {
     CloudVendorRepository cloudVendorRepository;
     public CloudVendorServieImpl(CloudVendorRepository cloudVendorRepository) {
         this.cloudVendorRepository = cloudVendorRepository;
@@ -28,12 +29,16 @@ public class CloudVendorServieImpl implements CloudVendorService {
 
     @Override
     public String deleteCloudVendor(String ID) {
+        if(cloudVendorRepository.findById(ID).isEmpty())
+            throw new CloudVendorNotFoundException("User Not found");
         cloudVendorRepository.deleteById(ID);
         return "user deleted successfully";
     }
 
     @Override
     public CloudVendor getCloudVendor(String cloudVendorId) {
+        if(cloudVendorRepository.findById(cloudVendorId).isEmpty())
+            throw new CloudVendorNotFoundException("User Not found");
         return cloudVendorRepository.findById(cloudVendorId).get();
     }
 
