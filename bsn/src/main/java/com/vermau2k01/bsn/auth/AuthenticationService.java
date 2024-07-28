@@ -3,6 +3,8 @@ package com.vermau2k01.bsn.auth;
 
 import com.vermau2k01.bsn.email.EmailService;
 import com.vermau2k01.bsn.email.EmailTemplateName;
+import com.vermau2k01.bsn.forgotPassword.PasswordResetToken;
+import com.vermau2k01.bsn.forgotPassword.PasswordResetTokenRepository;
 import com.vermau2k01.bsn.security.JwtService;
 import com.vermau2k01.bsn.token.Token;
 import com.vermau2k01.bsn.token.TokenRepository;
@@ -29,10 +31,13 @@ public class AuthenticationService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final TokenRepository tokenRepository;
     private final EmailService emailService;
     @Value("${application.mailing.frontend.activation-url}")
     private String activationUrl;
+    @Value("${application.mailing.frontend.reset-url}")
+    private String resetUrl;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
 
@@ -124,6 +129,47 @@ public class AuthenticationService {
         userRepository.save(user);
         savedToken.setValidatedAt(LocalDateTime.now());
         tokenRepository.save(savedToken);
+    }
 
+    public void requestPasswordReset(PasswordResetRequest request) throws MessagingException {
+        Users user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        PasswordResetToken resetToken = generateAndSavePasswordResetToken(user);
+
+        emailService.sendEmail(user.getEmail(),
+                user.getFullName(),
+                EmailTemplateName.RESET_PASSWORD,
+                resetUrl, resetToken.getToken(),
+                "Password Reset Request");
+    }
+
+    private PasswordResetToken generateAndSavePasswordResetToken(Users user) {
+        String token = generatedActivationCode();
+        PasswordResetToken resetToken = PasswordResetToken.builder()
+                .token(token)
+                .createdAt(LocalDateTime.now())
+                .expiredAt(LocalDateTime.now().plusMinutes(15))
+                .user(user)
+                .build();
+        passwordResetTokenRepository.save(resetToken);
+        return resetToken;
+    }
+
+    public void resetPassword(String token, String newPassword) {
+        PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(token)
+                .orElseThrow(() -> new RuntimeException("Invalid token"));
+
+        if (LocalDateTime.now().isAfter(resetToken.getExpiredAt())) {
+            throw new RuntimeException("Token expired");
+        }
+
+        Users user = userRepository.findById(resetToken.getUser().getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setPasscode(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+        resetToken.setValidatedAt(LocalDateTime.now());
+        passwordResetTokenRepository.save(resetToken);
     }
 }

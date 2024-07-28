@@ -37,4 +37,18 @@ public class AuthenticationController {
     public void confirm(@RequestParam String token) throws MessagingException {
         authenticationService.activateAccount(token);
     }
+
+    @PostMapping("/forgot-password")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<?> requestPasswordReset(@RequestBody @Valid PasswordResetRequest request) throws MessagingException {
+        authenticationService.requestPasswordReset(request);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/reset-password")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<?> resetPassword(@RequestParam String token, @RequestBody @Valid ResetPasswordRequest request) {
+        authenticationService.resetPassword(token, request.getNewPassword());
+        return ResponseEntity.ok().build();
+    }
 }

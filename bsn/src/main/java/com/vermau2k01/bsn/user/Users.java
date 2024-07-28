@@ -1,6 +1,7 @@
 package com.vermau2k01.bsn.user;
 
 import com.vermau2k01.bsn.books.Books;
+import com.vermau2k01.bsn.forgotPassword.PasswordResetToken;
 import com.vermau2k01.bsn.history.BookTransactionHistory;
 import jakarta.persistence.*;
 import lombok.*;
@@ -48,6 +49,8 @@ public class Users implements UserDetails, Principal {
     private List<Books> books;
     @OneToMany(mappedBy = "user")
     private List<BookTransactionHistory> histories;
+    @OneToMany(mappedBy = "user")
+    private List<PasswordResetToken> passwordResetToken;
 
 
     @CreatedDate
