@@ -1,5 +1,7 @@
 package com.vermau2k01.bsn.user;
 
+import com.vermau2k01.bsn.books.Books;
+import com.vermau2k01.bsn.history.BookTransactionHistory;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.NaturalId;
@@ -42,6 +44,10 @@ public class Users implements UserDetails, Principal {
     private boolean enabled;
     @ManyToMany(fetch = FetchType.EAGER)
     private List<Roles> role;
+    @OneToMany(mappedBy = "owner")
+    private List<Books> books;
+    @OneToMany(mappedBy = "user")
+    private List<BookTransactionHistory> histories;
 
 
     @CreatedDate
