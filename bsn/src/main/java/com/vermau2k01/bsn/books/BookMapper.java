@@ -17,4 +17,19 @@ public class BookMapper {
                 .sharable(request.sharable())
                 .build();
     }
+
+    public BookResponse toBookResponse(Books books) {
+
+        return BookResponse
+                .builder()
+                .id(books.getId())
+                .title(books.getTitle())
+                .authorName(books.getAuthorName())
+                .synopsis(books.getSynopsis())
+                .isbn(books.getIsbn())
+                .rate(books.getRate())
+                .sharable(books.isSharable())
+                .owner(books.getOwner().getFullName())
+                .build();
+    }
 }
